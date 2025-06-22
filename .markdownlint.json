@@ -1,0 +1,13 @@
+{
+  "MD033": {
+    "allowed_elements": [
+      "T",
+      "void",
+      "boolean"
+    ]
+  },
+    "MD013": {
+      "line_length": 200,
+      "code_block_line_length": 120
+    } 
+}
