@@ -4,7 +4,7 @@ export interface IProduct {
     title: string;
     description: string;
     image: string;
-    price: number;
+    price: number | null; // null для бесценных товаров
     category: string;
 }
 
@@ -29,7 +29,7 @@ export interface IOrderData {
     email: string;
     phone: string;
     address: string;
-    payment: TPaymentType | string;
+    payment: TPaymentType;
 }
 
 /** Контактные данные (для формы) */
@@ -52,7 +52,7 @@ export interface IApiError {
 /** Интерфейс API-клиента */
 export interface IApiClient {
     get<T>(uri: string): Promise<T>;
-    post<T>(uri: string, data: object, method?: string): Promise<T>;
+    post<T>(uri: string, data: object): Promise<T>;
 }
 
 /** Интерфейс модели корзины */
@@ -76,28 +76,23 @@ export interface IBasketView {
 /** Интерфейс базового компонента */
 export interface IComponent {
     render(...args: unknown[]): HTMLElement;
-    setVisible(isVisible: boolean): void;
-    setDisabled(isDisabled: boolean): void;
+    setVisible(isVisible: boolean): void; // Метод для будущего использования
+    setDisabled(isDisabled: boolean): void; // Метод для будущего использования
 }
 
 /** Список событий приложения */
 export type TAppEvent =
-    | 'modal:open'
-    | 'modal:close'
-    | 'basket:update'
-    | 'order:submit'
+    | 'basket:changed'
     | 'order:success'
     | 'order:error'
-    | 'product:add'
-    | 'product:remove'
-    | 'form:validate'
-    | 'form:error'
+    | 'catalog:loaded'
+    | 'catalog:error'
+    | 'preview:changed'
     | string;
 
 /** Интерфейс брокера событий */
 export interface IEventEmitter {
     on<T>(event: TAppEvent, handler: (data?: T) => void): void;
-    off<T>(event: TAppEvent, handler: (data?: T) => void): void;
     emit<T>(event: TAppEvent, data?: T): void;
 }
 
