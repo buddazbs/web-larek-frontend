@@ -74,6 +74,15 @@ const config = {
   },
   resolve: {
     extensions: [".tsx", ".ts", ".jsx", ".js", "..."],
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+      '@components': path.resolve(__dirname, 'src/components'),
+      '@models': path.resolve(__dirname, 'src/models'),
+      '@types': path.resolve(__dirname, 'src/types'),
+      '@utils': path.resolve(__dirname, 'src/utils'),
+      '@scss': path.resolve(__dirname, 'src/scss'),
+      '@images': path.resolve(__dirname, 'src/images'),
+    }
   },
   optimization: {
     minimize: true,

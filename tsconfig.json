@@ -7,6 +7,16 @@
     "allowJs": true,
     "experimentalDecorators": true,
     "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@components/*": ["src/components/*"],
+      "@models/*": ["src/models/*"],
+      "@types/*": ["src/types/*"],
+      "@utils/*": ["src/utils/*"],
+      "@scss/*": ["src/scss/*"],
+      "@images/*": ["src/images/*"]
+    }
   },
   "include": ["src/**/*.ts", "src/types/*.d.ts"]
 }

@@ -1,7 +1,7 @@
-// Хорошая практика даже простые типы выносить в алиасы
-// Зато когда захотите поменять это достаточно сделать в одном месте
+import { TAppEvent, IEventEmitter } from '../../types';
+
 type EventName = string | RegExp;
-type Subscriber = Function;
+type Subscriber = (...args: unknown[]) => void;
 type EmitterEvent = {
     eventName: string,
     data: unknown
@@ -15,10 +15,8 @@ export interface IEvents {
 
 /**
  * Брокер событий, классическая реализация
- * В расширенных вариантах есть возможность подписаться на все события
- * или слушать события по шаблону например
  */
-export class EventEmitter implements IEvents {
+export class EventEmitter implements IEvents, IEventEmitter {
     _events: Map<EventName, Set<Subscriber>>;
 
     constructor() {
@@ -28,7 +26,7 @@ export class EventEmitter implements IEvents {
     /**
      * Установить обработчик на событие
      */
-    on<T extends object>(eventName: EventName, callback: (event: T) => void) {
+    on<T>(eventName: TAppEvent, callback: (data?: T) => void): void {
         if (!this._events.has(eventName)) {
             this._events.set(eventName, new Set<Subscriber>());
         }
@@ -38,11 +36,14 @@ export class EventEmitter implements IEvents {
     /**
      * Снять обработчик с события
      */
-    off(eventName: EventName, callback: Subscriber) {
+    off<T>(eventName: TAppEvent, callback: (data?: T) => void): void {
         if (this._events.has(eventName)) {
-            this._events.get(eventName)!.delete(callback);
-            if (this._events.get(eventName)?.size === 0) {
-                this._events.delete(eventName);
+            const subscribers = this._events.get(eventName);
+            if (subscribers) {
+                subscribers.delete(callback);
+                if (subscribers.size === 0) {
+                    this._events.delete(eventName);
+                }
             }
         }
     }
@@ -50,7 +51,7 @@ export class EventEmitter implements IEvents {
     /**
      * Инициировать событие с данными
      */
-    emit<T extends object>(eventName: string, data?: T) {
+    emit<T>(eventName: TAppEvent, data?: T): void {
         this._events.forEach((subscribers, name) => {
             if (name === '*') subscribers.forEach(callback => callback({
                 eventName,
