@@ -37,7 +37,7 @@ export class Card extends Component {
 		return card as HTMLElement;
 	}
 
-	renderPreview(data: IProduct, isInBasket: boolean = false): HTMLElement {
+	renderPreview(data: IProduct, isInBasket = false): HTMLElement {
 		const card = this.template.content.cloneNode(true) as HTMLElement;
 		
 		const categoryElement = card.querySelector('.card__category') as HTMLElement;
