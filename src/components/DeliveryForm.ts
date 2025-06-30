@@ -42,7 +42,6 @@ export class DeliveryForm extends Component {
 		};
 
 		this.addressInput.addEventListener('input', validateForm);
-		// Также валидируем при выборе способа оплаты
 		const paymentButtons = this.form.querySelectorAll('button[name="card"], button[name="cash"]');
 		paymentButtons.forEach(button => {
 			button.addEventListener('click', validateForm);

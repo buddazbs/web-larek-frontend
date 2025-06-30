@@ -22,7 +22,6 @@ export class Card extends Component {
 
 		if (categoryElement) {
 			this.setText(categoryElement, data.category);
-			// Устанавливаем правильный класс для категории
 			categoryElement.className = `card__category card__category_${this.getCategoryClass(data.category)}`;
 		}
 		
