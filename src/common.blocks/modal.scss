@@ -20,12 +20,28 @@
   &__container {
     @include mixins.container;
     @include mixins.flex(column);
-    gap: $defaultPadding;
+    gap: 2.4rem;
     background-color: $background;
-    // min-height: 90vmin;
     border-radius: 3rem;
     box-sizing: border-box;
-    position: relative;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 2.4rem 2.4rem 2.4rem;
+    margin: auto;
+    width: 100%;
+    max-width: 55rem; // 880px
+
+    // Только для карточки товара
+    & > .card_full {
+      width: 55rem; // 880px
+      height: 40.3125rem; // 645px
+      border-radius: 3.75rem; // 60px
+      box-sizing: border-box;
+    }
   }
 
   &__content {
@@ -59,7 +75,7 @@
   }
 
   &__message {
-    white-space:nowrap;
+    white-space: nowrap;
     max-width: 60%;
     text-overflow: ellipsis;
     overflow: hidden;

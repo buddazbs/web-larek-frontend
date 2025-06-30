@@ -28,11 +28,24 @@ export class DeliveryForm extends Component {
 		const validateForm = () => {
 			const address = this.addressInput.value.trim();
 			const paymentSelected = this.selectedPayment !== null;
-			
+
+			const errors: TFormErrors = {};
+			if (!address) {
+				errors.address = 'Введите адрес доставки';
+			}
+			if (!paymentSelected) {
+				errors.payment = 'Выберите способ оплаты';
+			}
+
+			this.showErrors(errors);
 			this.submitButton.disabled = !(address && paymentSelected);
 		};
 
 		this.addressInput.addEventListener('input', validateForm);
+		const paymentButtons = this.form.querySelectorAll('button[name="card"], button[name="cash"]');
+		paymentButtons.forEach(button => {
+			button.addEventListener('click', validateForm);
+		});
 	}
 
 	private setupPaymentButtons(): void {
@@ -71,8 +84,7 @@ export class DeliveryForm extends Component {
 
 	showErrors(errors: TFormErrors): void {
 		this.errorsContainer.innerHTML = '';
-		
-		Object.entries(errors).forEach(([field, message]) => {
+		Object.entries(errors).forEach(([, message]) => {
 			if (message) {
 				const errorElement = document.createElement('div');
 				errorElement.className = 'form__error';
@@ -96,4 +108,4 @@ export class DeliveryForm extends Component {
 	render(): HTMLElement {
 		return this.container;
 	}
-} 
+}

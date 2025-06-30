@@ -35,3 +35,16 @@
     }
   }
 }
+
+.form__errors {
+  color: $error;
+  font-size: 1.1rem;
+  margin-top: 0.5rem;
+  display: block;
+}
+
+.form__error {
+  color: $error;
+  margin-bottom: 0.3rem;
+  font-size: 1.1rem;
+}

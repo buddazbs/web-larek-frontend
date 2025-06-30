@@ -12,7 +12,8 @@ export class Card extends Component {
 	}
 
 	renderGallery(data: IProduct): HTMLElement {
-		const card = this.template.content.cloneNode(true) as HTMLElement;
+		const fragment = this.template.content.cloneNode(true) as DocumentFragment;
+		const card = fragment.firstElementChild as HTMLElement;
 		
 		const categoryElement = card.querySelector('.card__category') as HTMLElement;
 		const titleElement = card.querySelector('.card__title') as HTMLElement;
@@ -21,7 +22,6 @@ export class Card extends Component {
 
 		if (categoryElement) {
 			this.setText(categoryElement, data.category);
-			// Устанавливаем правильный класс для категории
 			categoryElement.className = `card__category card__category_${this.getCategoryClass(data.category)}`;
 		}
 		
@@ -34,11 +34,12 @@ export class Card extends Component {
 			card.addEventListener('click', this.handleClick);
 		}
 
-		return card as HTMLElement;
+		return card;
 	}
 
 	renderPreview(data: IProduct, isInBasket = false): HTMLElement {
-		const card = this.template.content.cloneNode(true) as HTMLElement;
+		const fragment = this.template.content.cloneNode(true) as DocumentFragment;
+		const card = fragment.firstElementChild as HTMLElement;
 		
 		const categoryElement = card.querySelector('.card__category') as HTMLElement;
 		const titleElement = card.querySelector('.card__title') as HTMLElement;
@@ -78,11 +79,12 @@ export class Card extends Component {
 			}
 		}
 
-		return card as HTMLElement;
+		return card;
 	}
 
 	renderBasket(item: IBasketItem): HTMLElement {
-		const card = this.template.content.cloneNode(true) as HTMLElement;
+		const fragment = this.template.content.cloneNode(true) as DocumentFragment;
+		const card = fragment.firstElementChild as HTMLElement;
 		
 		const indexElement = card.querySelector('.basket__item-index') as HTMLElement;
 		const titleElement = card.querySelector('.card__title') as HTMLElement;
@@ -104,7 +106,7 @@ export class Card extends Component {
 			});
 		}
 
-		return card as HTMLElement;
+		return card;
 	}
 
 	private getCategoryClass(category: string): string {
