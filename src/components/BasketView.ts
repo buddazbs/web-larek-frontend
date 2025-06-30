@@ -14,19 +14,34 @@ export class BasketView extends Component {
 	}
 
 	renderBasket(items: HTMLElement[], total: number): void {
-		// Очищаем контейнер товаров
-		this.itemsContainer.innerHTML = '';
-		
-		// Добавляем товары
-		items.forEach(item => {
-			this.itemsContainer.appendChild(item);
-		});
-		
-		// Обновляем общую сумму
+		// Инициализация списка товаров
+		this.itemsContainer.replaceChildren(...items);
 		this.setPrice(this.totalElement, total);
-		
-		// Активируем/деактивируем кнопку оформления по стоимости
-		// Кнопка активна только если есть товары со стоимостью > 0
+		this.orderButton.disabled = total <= 0;
+	}
+
+	addItem(item: HTMLElement): void {
+		this.itemsContainer.appendChild(item);
+		this.updateTotal();
+	}
+
+	removeItem(itemId: string): void {
+		const item = this.itemsContainer.querySelector(`[data-id="${itemId}"]`);
+		if (item) {
+			this.itemsContainer.removeChild(item);
+			this.updateTotal();
+		}
+	}
+
+	updateTotal(): void {
+		const prices = Array.from(this.itemsContainer.querySelectorAll('.card__price'));
+		let total = 0;
+		prices.forEach((el) => {
+			const text = el.textContent || '';
+			const match = text.match(/(\d+)/);
+			if (match) total += parseInt(match[1], 10);
+		});
+		this.setPrice(this.totalElement, total);
 		this.orderButton.disabled = total <= 0;
 	}
 

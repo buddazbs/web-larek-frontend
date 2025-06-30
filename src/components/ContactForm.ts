@@ -35,10 +35,22 @@ export class ContactForm extends Component {
 		const validateForm = () => {
 			const email = this.emailInput.value.trim();
 			const phone = this.phoneInput.value.trim();
-			
-			const emailValid = email && this.validateEmail(email);
-			const phoneValid = phone && this.validatePhone(phone);
-			
+
+			const errors: TFormErrors = {};
+			if (!email) {
+				errors.email = 'Введите email';
+			} else if (!this.validateEmail(email)) {
+				errors.email = 'Некорректный email';
+			}
+			if (!phone) {
+				errors.phone = 'Введите телефон';
+			} else if (!this.validatePhone(phone)) {
+				errors.phone = 'Некорректный телефон';
+			}
+
+			this.showErrors(errors);
+			const emailValid = !errors.email;
+			const phoneValid = !errors.phone;
 			this.submitButton.disabled = !(emailValid && phoneValid);
 		};
 
@@ -62,8 +74,7 @@ export class ContactForm extends Component {
 
 	showErrors(errors: TFormErrors): void {
 		this.errorsContainer.innerHTML = '';
-		
-		Object.entries(errors).forEach(([field, message]) => {
+		Object.entries(errors).forEach(([, message]) => {
 			if (message) {
 				const errorElement = document.createElement('div');
 				errorElement.className = 'form__error';
@@ -82,4 +93,4 @@ export class ContactForm extends Component {
 	render(): HTMLElement {
 		return this.container;
 	}
-} 
+}

@@ -32,6 +32,9 @@ const orderTemplate = document.querySelector('#order') as HTMLTemplateElement;
 const contactsTemplate = document.querySelector('#contacts') as HTMLTemplateElement;
 const successTemplate = document.querySelector('#success') as HTMLTemplateElement;
 
+// Объявляем basketView на верхнем уровне
+let basketView: BasketView;
+
 // Создаем компоненты карточек
 const cardCatalog = new Card(cardCatalogTemplate, (event) => {
 	const cardElement = event.currentTarget as HTMLElement;
@@ -61,19 +64,27 @@ const cardPreview = new Card(cardPreviewTemplate, (event) => {
 const cardBasket = new Card(cardBasketTemplate);
 
 // Создаем компоненты форм из шаблонов
-const basketView = new BasketView(basketTemplate.content.cloneNode(true) as HTMLElement);
 const deliveryForm = new DeliveryForm(orderTemplate.content.cloneNode(true) as HTMLElement);
 const contactForm = new ContactForm(contactsTemplate.content.cloneNode(true) as HTMLElement);
 const successMessage = new SuccessMessage(successTemplate.content.cloneNode(true) as HTMLElement);
 
+// Инициализация basketView после получения элемента из шаблона
+const basketFragment = basketTemplate.content.cloneNode(true) as DocumentFragment;
+const basketElement = basketFragment.querySelector('.basket') as HTMLElement;
+basketView = new BasketView(basketElement);
+
 // Обработчики событий
 events.on('catalog:loaded', (products: IProduct[]) => {
-	const cards = products.map(product => {
-		const cardElement = cardCatalog.renderGallery(product);
-		(cardElement as HTMLElement).dataset.id = product.id;
-		return cardElement;
-	});
-	mainPage.renderGallery(cards);
+	try {
+		const cards = products.map(product => {
+			const cardElement = cardCatalog.renderGallery(product);
+			(cardElement as HTMLElement).dataset.id = product.id;
+			return cardElement;
+		});
+		mainPage.renderGallery(cards);
+	} catch (err) {
+		console.error('[index.ts] Ошибка при рендере карточек', err);
+	}
 });
 
 events.on('catalog:error', (error: any) => {
@@ -93,15 +104,34 @@ events.on('preview:changed', (product: IProduct | null) => {
 	}
 });
 
+// Обработчик события изменения корзины
+// Обновляем только счетчик в шапке и, если открыта модалка корзины, динамически добавляем/удаляем товары
 events.on('basket:changed', (items: IBasketItem[]) => {
-	// Обновляем счетчик в шапке
 	mainPage.setBasketCount(items.length);
-	
-	// Обновляем корзину
-	const basketCards = items.map(item => cardBasket.renderBasket(item));
-	basketView.renderBasket(basketCards, appState.getBasketTotal());
-	
-	// Если открыто модальное окно с товаром, обновляем его
+	if (modal.isOpen()) {
+		const currentIds = Array.from(basketView.render().querySelectorAll('.basket__item')).map(el => el.getAttribute('data-id'));
+		const newIds = items.map(item => item.id);
+
+		// Добавляем новые товары
+		items.forEach(item => {
+			if (!currentIds.includes(item.id)) {
+				const card = cardBasket.renderBasket(item);
+				card.setAttribute('data-id', item.id);
+				card.classList.add('basket__item');
+				basketView.addItem(card);
+			}
+		});
+
+		// Удаляем отсутствующие товары
+		currentIds.forEach(id => {
+			if (id && !newIds.includes(id)) {
+				basketView.removeItem(id);
+			}
+		});
+		basketView.updateTotal();
+		modal.setContent(basketView.render());
+	}
+	// Если открыто превью товара, обновляем его
 	const product = appState.getPreview();
 	if (product && modal.isOpen()) {
 		const isInBasket = appState.isInBasket(product.id);
@@ -110,24 +140,16 @@ events.on('basket:changed', (items: IBasketItem[]) => {
 	}
 });
 
-// Обработчик успешного заказа
-events.on('order:success', (total: number) => {
-	const successContent = successMessage.render();
-	successMessage.show(total);
-	modal.open(successContent);
-});
-
-// Обработчик ошибки заказа
-events.on('order:error', (error: any) => {
-	console.error('Ошибка отправки заказа:', error);
-	// Можно добавить отображение ошибки пользователю
-	contactForm.showErrors({
-		email: 'Ошибка отправки заказа. Попробуйте еще раз.'
-	});
-});
-
 // Обработчик клика на корзину в шапке
 mainPage.setBasketClickHandler(() => {
+	const basket = appState.getBasket();
+	const basketItems = basket.map(item => {
+		const card = cardBasket.renderBasket(item);
+		card.setAttribute('data-id', item.id);
+		card.classList.add('basket__item');
+		return card;
+	});
+	basketView.renderBasket(basketItems, appState.getBasketTotal());
 	const basketContent = basketView.render();
 	modal.open(basketContent);
 });
@@ -152,26 +174,21 @@ deliveryForm.setSubmitHandler(() => {
 // Обработчик отправки формы контактов
 contactForm.setSubmitHandler(async () => {
 	const { email, phone } = contactForm.getData();
-	
 	appState.setOrderField('email', email);
 	appState.setOrderField('phone', phone);
-	
+
 	const success = await appState.submitOrder();
 	if (!success) {
 		// Проверяем валидность данных
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		const digitsOnly = phone.replace(/\D/g, '');
-		
 		const errors: Record<string, string> = {};
-		
 		if (!email || !emailRegex.test(email)) {
 			errors.email = 'Введите корректный email адрес';
 		}
-		
 		if (!phone || digitsOnly.length < 10) {
 			errors.phone = 'Введите корректный номер телефона';
 		}
-		
 		contactForm.showErrors(errors);
 	}
 });
@@ -186,6 +203,14 @@ document.addEventListener('basket:remove', ((event: CustomEvent) => {
 	const { id } = event.detail;
 	appState.removeFromBasket(id);
 }) as EventListener);
+
+// Окно успешной оплаты
+// Показываем модалку при успешном заказе
+
+events.on('order:success', (total: number) => {
+	successMessage.show(total);
+	modal.open(successMessage.render());
+});
 
 // Загружаем каталог при запуске
 appState.loadCatalog();
