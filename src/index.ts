@@ -136,40 +136,61 @@ mainPage.setBasketClickHandler(() => {
 
 // Обработчик оформления заказа из корзины
 basketView.setOrderHandler(() => {
-	const deliveryContent = deliveryForm.render();
-	modal.open(deliveryContent);
+    // Перед открытием формы доставки корзина НЕ очищается!
+    // Данные для заказа всегда берутся из appState
+    const deliveryContent = deliveryForm.render();
+    modal.open(deliveryContent);
 });
 
 // Обработчик отправки формы доставки
+// После возврата из формы доставки всегда пересоздаём корзину
+
 deliveryForm.setSubmitHandler(() => {
-	const { address, payment } = deliveryForm.getData();
-	
-	appState.setOrderField('address', address);
-	appState.setOrderField('payment', payment);
-	
-	const contactContent = contactForm.render();
-	modal.open(contactContent);
+    const { address, payment } = deliveryForm.getData();
+    appState.setOrderField('address', address);
+    appState.setOrderField('payment', payment);
+    // Передаём в форму контактов только после сохранения данных в appState
+    const contactContent = contactForm.render();
+    modal.open(contactContent);
 });
+
+// При возврате к корзине из любой формы всегда рендерим корзину заново
+function openBasketModal() {
+    // Берём актуальное состояние корзины из appState
+    const basket = appState.getBasket();
+    const basketItems = basket.map(item => {
+        const card = cardBasket.renderBasket(item);
+        card.setAttribute('data-id', item.id);
+        card.classList.add('basket__item');
+        return card;
+    });
+    basketView.renderBasket(basketItems, appState.getBasketTotal());
+    const basketContent = basketView.render();
+    modal.open(basketContent);
+}
+
+// Используйте openBasketModal() для возврата к корзине, если потребуется
 
 // Обработчик отправки формы контактов
 contactForm.setSubmitHandler(async () => {
-	const { email, phone } = contactForm.getData();
-	appState.setOrderField('email', email);
-	appState.setOrderField('phone', phone);
+    const { email, phone } = contactForm.getData();
+    appState.setOrderField('email', email);
+    appState.setOrderField('phone', phone);
 
-	const errors: Record<string, string> = {};
-	errors.email = appState.validateEmail(email) || '';
-	errors.phone = appState.validatePhone(phone) || '';
-	contactForm.showErrors(errors);
-	const isValid = !errors.email && !errors.phone;
-	contactForm.setSubmitDisabled(!isValid);
+    const errors: Record<string, string> = {};
+    errors.email = appState.validateEmail(email) || '';
+    errors.phone = appState.validatePhone(phone) || '';
+    contactForm.showErrors(errors);
+    const isValid = !errors.email && !errors.phone;
+    contactForm.setSubmitDisabled(!isValid);
 
-	if (isValid) {
-		const success = await appState.submitOrder();
-		if (!success) {
-			// Можно показать общую ошибку заказа
-		}
-	}
+    if (isValid) {
+        // Перед отправкой заказа корзина НЕ очищается
+        const success = await appState.submitOrder();
+        if (!success) {
+            // Можно показать общую ошибку заказа
+        }
+    }
 });
 
 // Немедленная валидация при вводе
@@ -198,8 +219,10 @@ document.addEventListener('basket:remove', ((event: CustomEvent) => {
 // Показываем модалку при успешном заказе
 
 events.on('order:success', (total: number) => {
-	successMessage.show(total);
-	modal.open(successMessage.render());
+    // Очищаем корзину только после успешного заказа!
+    appState.clearBasket && appState.clearBasket();
+    successMessage.show(total);
+    modal.open(successMessage.render());
 });
 
 // Загружаем каталог при запуске
