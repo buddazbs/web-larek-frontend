@@ -152,6 +152,22 @@ export class AppState {
 		return emailValid && phoneValid && addressValid && paymentValid;
 	}
 
+	// Валидация email
+	public validateEmail(email: string): string | null {
+		if (!email) return 'Введите email';
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(email)) return 'Некорректный email';
+		return null;
+	}
+
+	// Валидация телефона
+	public validatePhone(phone: string): string | null {
+		if (!phone) return 'Введите телефон';
+		const digitsOnly = phone.replace(/\D/g, '');
+		if (digitsOnly.length < 10) return 'Некорректный телефон';
+		return null;
+	}
+
 	async submitOrder(): Promise<boolean> {
 		if (!this.validateOrder() || !this.order) {
 			return false;

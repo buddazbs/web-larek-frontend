@@ -20,31 +20,6 @@ export class BasketView extends Component {
 		this.orderButton.disabled = total <= 0;
 	}
 
-	addItem(item: HTMLElement): void {
-		this.itemsContainer.appendChild(item);
-		this.updateTotal();
-	}
-
-	removeItem(itemId: string): void {
-		const item = this.itemsContainer.querySelector(`[data-id="${itemId}"]`);
-		if (item) {
-			this.itemsContainer.removeChild(item);
-			this.updateTotal();
-		}
-	}
-
-	updateTotal(): void {
-		const prices = Array.from(this.itemsContainer.querySelectorAll('.card__price'));
-		let total = 0;
-		prices.forEach((el) => {
-			const text = el.textContent || '';
-			const match = text.match(/(\d+)/);
-			if (match) total += parseInt(match[1], 10);
-		});
-		this.setPrice(this.totalElement, total);
-		this.orderButton.disabled = total <= 0;
-	}
-
 	setOrderHandler(handler: () => void): void {
 		this.orderButton.addEventListener('click', handler);
 	}
@@ -52,4 +27,4 @@ export class BasketView extends Component {
 	render(): HTMLElement {
 		return this.container;
 	}
-} 
+}
