@@ -10,52 +10,11 @@ export class ContactForm extends Component {
 
 	constructor(container: HTMLElement) {
 		super(container);
-		
 		this.form = container.querySelector('form[name="contacts"]') as HTMLFormElement;
 		this.emailInput = this.form.querySelector('input[name="email"]') as HTMLInputElement;
 		this.phoneInput = this.form.querySelector('input[name="phone"]') as HTMLInputElement;
 		this.submitButton = this.form.querySelector('button[type="submit"]') as HTMLButtonElement;
 		this.errorsContainer = this.form.querySelector('.form__errors') as HTMLElement;
-		
-		this.setupValidation();
-	}
-
-	private validateEmail(email: string): boolean {
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		return emailRegex.test(email);
-	}
-
-	private validatePhone(phone: string): boolean {
-		// Убираем все нецифровые символы и проверяем длину
-		const digitsOnly = phone.replace(/\D/g, '');
-		return digitsOnly.length >= 10;
-	}
-
-	private setupValidation(): void {
-		const validateForm = () => {
-			const email = this.emailInput.value.trim();
-			const phone = this.phoneInput.value.trim();
-
-			const errors: TFormErrors = {};
-			if (!email) {
-				errors.email = 'Введите email';
-			} else if (!this.validateEmail(email)) {
-				errors.email = 'Некорректный email';
-			}
-			if (!phone) {
-				errors.phone = 'Введите телефон';
-			} else if (!this.validatePhone(phone)) {
-				errors.phone = 'Некорректный телефон';
-			}
-
-			this.showErrors(errors);
-			const emailValid = !errors.email;
-			const phoneValid = !errors.phone;
-			this.submitButton.disabled = !(emailValid && phoneValid);
-		};
-
-		this.emailInput.addEventListener('input', validateForm);
-		this.phoneInput.addEventListener('input', validateForm);
 	}
 
 	getData(): IContactData {
@@ -70,6 +29,15 @@ export class ContactForm extends Component {
 			event.preventDefault();
 			handler();
 		});
+	}
+
+	setInputHandler(handler: () => void): void {
+		this.emailInput.addEventListener('input', handler);
+		this.phoneInput.addEventListener('input', handler);
+	}
+
+	setSubmitDisabled(isDisabled: boolean): void {
+		this.submitButton.disabled = isDisabled;
 	}
 
 	showErrors(errors: TFormErrors): void {

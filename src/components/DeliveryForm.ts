@@ -54,9 +54,13 @@ export class DeliveryForm extends Component {
 		paymentButtons.forEach(button => {
 			button.addEventListener('click', () => {
 				// Убираем активное состояние у всех кнопок
-				paymentButtons.forEach(btn => btn.classList.remove('button_alt'));
-				// Добавляем активное состояние к нажатой кнопке
+				paymentButtons.forEach(btn => {
+					btn.classList.remove('button_alt');
+					btn.classList.remove('button_alt-active');
+				});
+				// Добавляем активное состояние и белую рамку к нажатой кнопке
 				button.classList.add('button_alt');
+				button.classList.add('button_alt-active');
 				
 				// Сохраняем выбранный способ оплаты
 				this.selectedPayment = button.getAttribute('name') as TPaymentType;
