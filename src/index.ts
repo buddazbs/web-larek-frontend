@@ -171,8 +171,6 @@ function openBasketModal() {
     modal.open(basketContent);
 }
 
-// Используйте openBasketModal() для возврата к корзине, если потребуется
-
 // Обработчик отправки формы контактов
 contactForm.setSubmitHandler(async () => {
     const { email, phone } = contactForm.getData();
