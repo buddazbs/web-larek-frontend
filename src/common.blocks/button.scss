@@ -2,19 +2,43 @@
 @use "mixins";
 
 .button {
-  @include mixins.button($primary, white, $hover);
+  padding: 1rem 2rem;
+  color: #060C14;
+  font-weight: 500;
+  background: white;
+  border-radius: 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
   border: 0;
 
-  &_alt {
-    @include mixins.button(white, $primaryLight, $primaryLight);
-    border: $defaultBorder;
-    &:hover {
-      border: $hoverBorder;
-    }
-  }
-
+  &_alt,
   &_alt-active {
-    @include mixins.button(white, $primaryLight, $primaryLight);
+    background: none;
+    color: white;
+    border: $defaultBorder;
+    transition: border 0.2s;
+  }
+  &_alt:hover {
     border: $hoverBorder;
+    background: none;
+  }
+  &_alt-active {
+    border: $hoverBorder;
+  }
+}
+
+.payment-button {
+  background: none !important;
+  color: white;
+  border: $defaultBorder;
+  transition: border 0.2s;
+
+  &:hover {
+    border: $hoverBorder;
+    background: none !important;
+  }
+  &.button_alt-active {
+    border: $hoverBorder;
+    background: none !important;
   }
 }

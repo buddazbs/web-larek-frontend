@@ -57,6 +57,8 @@ const cardPreview = new Card(cardPreviewTemplate, (event) => {
 			} else {
 				appState.addToBasket(product);
 			}
+			// После добавления/удаления товара просто закрываем модалку карточки, корзину не открываем
+			modal.close();
 		}
 	}
 });
