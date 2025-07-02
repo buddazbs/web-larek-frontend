@@ -225,5 +225,34 @@ events.on('order:success', (total: number) => {
     modal.open(successMessage.render());
 });
 
+// --- DeliveryForm: немедленная валидация через модель ---
+const deliveryValidateHandler = () => {
+	const address = deliveryForm["addressInput"].value.trim();
+	const payment = deliveryForm["selectedPayment"];
+	appState.updateDeliveryForm(address, payment);
+};
+deliveryForm["addressInput"].addEventListener('input', deliveryValidateHandler);
+deliveryForm["cardPaymentRadio"].addEventListener('click', deliveryValidateHandler);
+deliveryForm["cashPaymentRadio"].addEventListener('click', deliveryValidateHandler);
+
+events.on('deliveryForm:validated', ({ errors, isValid }) => {
+	deliveryForm.showErrors(errors);
+	deliveryForm.setSubmitDisabled(!isValid);
+});
+
+// --- ContactForm: немедленная валидация через модель ---
+const contactValidateHandler = () => {
+	const email = contactForm["emailInput"].value.trim();
+	const phone = contactForm["phoneInput"].value.trim();
+	appState.updateContactForm(email, phone);
+};
+contactForm["emailInput"].addEventListener('input', contactValidateHandler);
+contactForm["phoneInput"].addEventListener('input', contactValidateHandler);
+
+events.on('contactForm:validated', ({ errors, isValid }) => {
+	contactForm.showErrors(errors);
+	contactForm.setSubmitDisabled(!isValid);
+});
+
 // Загружаем каталог при запуске
 appState.loadCatalog();

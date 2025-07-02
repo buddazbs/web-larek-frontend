@@ -22,6 +22,7 @@ export class DeliveryForm extends Component {
 		
 		this.setupValidation();
 		this.setupPaymentButtons();
+		this.setSubmitDisabled(true); // Кнопка неактивна при инициализации
 	}
 
 	private setupValidation(): void {
@@ -84,6 +85,11 @@ export class DeliveryForm extends Component {
 			event.preventDefault();
 			handler();
 		});
+	}
+
+	setSubmitDisabled(isDisabled: boolean): void {
+		this.submitButton.disabled = isDisabled;
+		this.submitButton.classList.toggle('button_disabled', isDisabled);
 	}
 
 	showErrors(errors: TFormErrors): void {

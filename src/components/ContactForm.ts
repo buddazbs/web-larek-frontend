@@ -15,6 +15,7 @@ export class ContactForm extends Component {
 		this.phoneInput = this.form.querySelector('input[name="phone"]') as HTMLInputElement;
 		this.submitButton = this.form.querySelector('button[type="submit"]') as HTMLButtonElement;
 		this.errorsContainer = this.form.querySelector('.form__errors') as HTMLElement;
+		this.setSubmitDisabled(true); // Кнопка неактивна при инициализации
 	}
 
 	getData(): IContactData {
@@ -38,6 +39,7 @@ export class ContactForm extends Component {
 
 	setSubmitDisabled(isDisabled: boolean): void {
 		this.submitButton.disabled = isDisabled;
+		this.submitButton.classList.toggle('button_disabled', isDisabled);
 	}
 
 	showErrors(errors: TFormErrors): void {

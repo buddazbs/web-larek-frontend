@@ -1,4 +1,4 @@
-import { IProduct, IBasketItem, IOrderData, IApiListResponse } from '../types';
+import { IProduct, IBasketItem, IOrderData, IApiListResponse, TPaymentType, TFormErrors } from '../types';
 import { Api } from '../components/base/api';
 import { EventEmitter } from '../components/base/events';
 import { API_URL } from '../utils/constants';
@@ -12,6 +12,14 @@ export class AppState {
 	private order: IOrderData | null = null;
 	private api: Api;
 	private events: EventEmitter;
+
+	// Добавляем поля для хранения состояния формы доставки
+	private deliveryAddress: string = '';
+	private deliveryPayment: TPaymentType | null = null;
+
+	// Новые поля для хранения email и телефона
+	private contactEmail = '';
+	private contactPhone = '';
 
 	private saveBasketToStorage() {
 		const ids = this.basket.map(item => item.id);
@@ -166,6 +174,28 @@ export class AppState {
 		const digitsOnly = phone.replace(/\D/g, '');
 		if (digitsOnly.length < 10) return 'Некорректный телефон';
 		return null;
+	}
+
+	// Метод для обновления состояния формы доставки и валидации
+	public updateDeliveryForm(address: string, payment: TPaymentType | null) {
+		this.deliveryAddress = address;
+		this.deliveryPayment = payment;
+		const errors: TFormErrors = {};
+		if (!address) errors.address = 'Введите адрес доставки';
+		if (!payment) errors.payment = 'Выберите способ оплаты';
+		const isValid = !errors.address && !errors.payment;
+		this.events.emit('deliveryForm:validated', { errors, isValid });
+	}
+
+	// Метод для обновления состояния формы контактов и валидации
+	public updateContactForm(email: string, phone: string) {
+		this.contactEmail = email;
+		this.contactPhone = phone;
+		const errors: TFormErrors = {};
+		errors.email = this.validateEmail(email) || '';
+		errors.phone = this.validatePhone(phone) || '';
+		const isValid = !errors.email && !errors.phone;
+		this.events.emit('contactForm:validated', { errors, isValid });
 	}
 
 	async submitOrder(): Promise<boolean> {
